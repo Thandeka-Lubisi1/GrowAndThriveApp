@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Grow & Thrive - Learn to grow your own food and start a small business">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Grow & Thrive</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <!-- Language Selector (Fixed Position) -->
+    <div id="language-selector" class="language-selector">
+        <select id="language-dropdown" onchange="changeLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="af">Afrikaans</option>
+            <option value="nr">isiNdebele (Southern Ndebele)</option>
+            <option value="xh">isiXhosa</option>
+            <option value="zu">isiZulu</option>
+            <option value="st">Sesotho (Southern Sotho)</option>
+            <option value="nso">Sepedi (Northern Sotho)</option>
+            <option value="tn">Setswana</option>
+            <option value="ss">siSwati (Swati or Swazi)</option>
+            <option value="ve">Tshivenda</option>
+            <option value="ts">Xitsonga</option>
+            <option value="sasl">South African Sign Language (SASL)</option>
+        </select>
+    </div>
+
+    <!-- Splash/Intro Screen -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <h1 data-translate="app_title">Grow & Thrive</h1>
+            </div>
+            <div class="intro-text">
+                <h2 data-translate="welcome_title">🌱 Welcome to Grow & Thrive!</h2>
+                <p data-translate="welcome_description">This app helps you use what you have to grow your own food. Whether you don't have a job or struggle to buy groceries — planting vegetables at home can give you food to eat and even sell.</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span data-translate="feature_1">Learn what to plant</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span data-translate="feature_2">Follow step-by-step planting guides</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span data-translate="feature_3">Get reminders to water your plants</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span data-translate="feature_4">Track growth from day 1 to harvest</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span data-translate="feature_5">Learn how to cook or sell your veggies</span>
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="showScreen('signup-screen')" data-translate="sign_up">Sign Up</button>
+                    <button class="btn btn-secondary" onclick="showScreen('login-screen')" data-translate="login">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Up Screen -->
+    <div id="signup-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <button class="back-btn" onclick="showScreen('splash-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="create_account">Create Account</h2>
+            </div>
+            
+            <div class="auth-info">
+                <h3 data-translate="why_signup">Why Sign Up?</h3>
+                <p data-translate="signup_benefits">Creating an account helps you:</p>
+                <ul>
+                    <li data-translate="benefit_1">Save your planting progress</li>
+                    <li data-translate="benefit_2">Get watering reminders</li>
+                    <li data-translate="benefit_3">Track your harvest</li>
+                    <li data-translate="benefit_4">Sell or cook your vegetables</li>
+                </ul>
+            </div>
+
+            <form id="signup-form" class="auth-form">
+                <div class="form-group">
+                    <label for="signup-firstname" data-translate="first_name">First Name</label>
+                    <input type="text" id="signup-firstname" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-lastname" data-translate="last_name">Last Name</label>
+                    <input type="text" id="signup-lastname" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-age" data-translate="age">Age</label>
+                    <input type="number" id="signup-age" min="13" max="120" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-email" data-translate="email">Email</label>
+                    <input type="email" id="signup-email" required>
+                    <span class="error-message" id="email-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-password" data-translate="password">Password</label>
+                    <input type="password" id="signup-password" required>
+                    <div class="password-requirements">
+                        <div class="requirement" id="req-length">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_length">At least 8 characters</span>
+                        </div>
+                        <div class="requirement" id="req-uppercase">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_uppercase">One uppercase letter</span>
+                        </div>
+                        <div class="requirement" id="req-symbol">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_symbol">One special character</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" data-translate="create_account">Create Account</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p data-translate="already_have_account">Already have an account? <a href="#" onclick="showScreen('login-screen')" data-translate="login_here">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <button class="back-btn" onclick="showScreen('splash-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="welcome_back">Welcome Back!</h2>
+            </div>
+            
+            <div class="auth-info">
+                <p data-translate="login_description">Log in to continue planting, growing, and feeding your future.</p>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email" data-translate="email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password" data-translate="password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" data-translate="login">Login</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p data-translate="no_account">Don't have an account? <a href="#" onclick="showScreen('signup-screen')" data-translate="sign_up_here">Sign up here</a></p>
+                <p><a href="#" onclick="showScreen('forgot-password-screen')" data-translate="forgot_password">Forgot Password?</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="screen">
+        <div class="welcome-container">
+            <div class="welcome-header">
+                <h2 id="welcome-message" data-translate="welcome_user">🎉 Welcome, User!</h2>
+                <p data-translate="welcome_instruction">You're now part of the Grow & Thrive community. Start by picking a vegetable below to learn how to plant and grow it.</p>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="vegetable-search" data-translate-placeholder="search_vegetables" placeholder="Search vegetables...">
+                </div>
+            </div>
+            
+            <div class="vegetables-grid" id="vegetables-grid">
+                <!-- Vegetables will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vegetable Detail Screen -->
+    <div id="vegetable-detail-screen" class="screen">
+        <div class="detail-container">
+            <div class="detail-header">
+                <button class="back-btn" onclick="showScreen('welcome-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 id="vegetable-name">Vegetable Name</h2>
+            </div>
+            
+            <div class="vegetable-image">
+                <img id="vegetable-img" src="" alt="">
+            </div>
+            
+            <div class="detail-tabs">
+                <button class="tab-btn active" onclick="showTab('soil-check')" data-translate="soil_check">Soil Check</button>
+                <button class="tab-btn" onclick="showTab('resources')" data-translate="resources">Resources</button>
+                <button class="tab-btn" onclick="showTab('instructions')" data-translate="instructions">Instructions</button>
+                <button class="tab-btn" onclick="showTab('tracker')" data-translate="growth_tracker">Growth Tracker</button>
+                <button class="tab-btn" onclick="showTab('post-harvest')" data-translate="post_harvest">Post-Harvest</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Soil Check Tab -->
+                <div id="soil-check" class="tab-panel active">
+                    <h3 data-translate="soil_suitability_check">Soil Suitability Check</h3>
+                    <form id="soil-form">
+                        <div class="form-group">
+                            <label data-translate="soil_type_question">What type of soil do you have?</label>
+                            <select id="soil-type" required>
+                                <option value="" data-translate="select_soil_type">Select soil type</option>
+                                <option value="clay" data-translate="clay">Clay</option>
+                                <option value="sandy" data-translate="sandy">Sandy</option>
+                                <option value="loamy" data-translate="loamy">Loamy</option>
+                                <option value="unknown" data-translate="dont_know">I don't know</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate="rainfall_question">How often does it rain in your area?</label>
+                            <select id="rainfall" required>
+                                <option value="" data-translate="select_frequency">Select frequency</option>
+                                <option value="daily" data-translate="daily">Daily</option>
+                                <option value="weekly" data-translate="weekly">Weekly</option>
+                                <option value="monthly" data-translate="monthly">Monthly</option>
+                                <option value="rarely" data-translate="rarely">Rarely</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate="fertilizer_question">Do you have access to compost or fertilizer?</label>
+                            <select id="fertilizer" required>
+                                <option value="" data-translate="select_option">Select option</option>
+                                <option value="yes" data-translate="yes">Yes</option>
+                                <option value="no" data-translate="no">No</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" data-translate="check_soil_suitability">Check Soil Suitability</button>
+                    </form>
+                    
+                    <div id="soil-result" class="result-box" style="display: none;">
+                        <!-- Result will be shown here -->
+                    </div>
+                </div>
+                
+                <!-- Resources Tab -->
+                <div id="resources" class="tab-panel">
+                    <h3 data-translate="required_resources_tools">Required Resources & Tools</h3>
+                    <div class="resources-list">
+                        <div class="resource-category">
+                            <h4><i class="fas fa-tools"></i> <span data-translate="tools">Tools</span></h4>
+                            <ul id="tools-list">
+                                <!-- Tools will be loaded here -->
+                            </ul>
+                        </div>
+                        
+                        <div class="resource-category">
+                            <h4><i class="fas fa-seedling"></i> <span data-translate="seeds">Seeds</span></h4>
+                            <ul id="seeds-list">
+                                <!-- Seeds will be loaded here -->
+                            </ul>
+                        </div>
+                        
+                        <div class="resource-category">
+                            <h4><i class="fas fa-leaf"></i> <span data-translate="soil_fertilizer">Soil & Fertilizer</span></h4>
+                            <ul id="fertilizer-list">
+                                <!-- Fertilizer will be loaded here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instructions Tab -->
+                <div id="instructions" class="tab-panel">
+                    <h3 data-translate="planting_instructions">Planting Instructions</h3>
+                    <div class="instructions-content">
+                        <div id="instructions-steps">
+                            <!-- Steps will be loaded here -->
+                        </div>
+                        
+                        <div class="video-container">
+                            <h4 data-translate="video_tutorial">Video Tutorial</h4>
+                            <div id="video-placeholder">
+                                <i class="fas fa-play-circle"></i>
+                                <p data-translate="video_placeholder">Video tutorial will be embedded here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Growth Tracker Tab -->
+                <div id="tracker" class="tab-panel">
+                    <h3 data-translate="growth_tracker">Growth Tracker</h3>
+                    <div class="tracker-content">
+                        <div class="calendar-view">
+                            <h4 data-translate="planting_calendar">Planting Calendar</h4>
+                            <div id="calendar-container">
+                                <!-- Calendar will be generated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="daily-tasks">
+                            <h4 data-translate="todays_tasks">Today's Tasks</h4>
+                            <div id="daily-tasks-list">
+                                <!-- Tasks will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="startTracking()" data-translate="start_tracking">Start Tracking This Plant</button>
+                    </div>
+                </div>
+                
+                <!-- Post-Harvest Tab -->
+                <div id="post-harvest" class="tab-panel">
+                    <h3 data-translate="post_harvest_options">Post-Harvest Options</h3>
+                    <div class="post-harvest-options">
+                        <div class="option-card">
+                            <h4><i class="fas fa-store"></i> <span data-translate="sell_veggies">Sell Your Veggies</span></h4>
+                            <p data-translate="sell_description">List your vegetables for sale in our marketplace</p>
+                            <button class="btn btn-secondary" onclick="showMarketplace()" data-translate="go_to_marketplace">Go to Marketplace</button>
+                        </div>
+                        
+                        <div class="option-card">
+                            <h4><i class="fas fa-utensils"></i> <span data-translate="cook_veggies">Cook Your Veggies</span></h4>
+                            <p data-translate="cook_description">Find delicious recipes using your harvested vegetables</p>
+                            <button class="btn btn-secondary" onclick="showRecipes()" data-translate="view_recipes">View Recipes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marketplace Screen -->
+    <div id="marketplace-screen" class="screen">
+        <div class="marketplace-container">
+            <div class="marketplace-header">
+                <button class="back-btn" onclick="goBackToDetail()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="marketplace">Marketplace</h2>
+            </div>
+            
+            <div class="marketplace-content">
+                <div class="sell-section">
+                    <h3 data-translate="sell_vegetables">Sell Your Vegetables</h3>
+                    <form id="sell-form">
+                        <div class="form-group">
+                            <label data-translate="vegetable_name">Vegetable Name</label>
+                            <input type="text" id="sell-vegetable" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate="quantity_kg">Quantity (kg)</label>
+                            <input type="number" id="sell-quantity" min="0.1" step="0.1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate="price_per_kg">Price per kg (R)</label>
+                            <input type="number" id="sell-price" min="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label data-translate="contact_information">Contact Information</label>
+                            <input type="text" id="sell-contact" data-translate-placeholder="phone_or_email" placeholder="Phone or email" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" data-translate="list_for_sale">List for Sale</button>
+                    </form>
+                </div>
+                
+                <div class="buy-section">
+                    <h3 data-translate="available_vegetables">Available Vegetables</h3>
+                    <div id="marketplace-listings">
+                        <!-- Listings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Screen -->
+    <div id="forgot-password-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <button class="back-btn" onclick="showScreen('login-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="reset_password">Reset Password</h2>
+            </div>
+            
+            <div class="auth-info">
+                <h3 data-translate="need_help">Need Help?</h3>
+                <p data-translate="reset_description">Enter your email address and we'll send you a link to reset your password.</p>
+            </div>
+
+            <form id="forgot-password-form" class="auth-form">
+                <div class="form-group">
+                    <label for="reset-email" data-translate="email_address">Email Address</label>
+                    <input type="email" id="reset-email" required>
+                    <span class="error-message" id="reset-email-error"></span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" data-translate="send_reset_link">Send Reset Link</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p data-translate="remember_password">Remember your password? <a href="#" onclick="showScreen('login-screen')" data-translate="login_here">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Screen -->
+    <div id="reset-password-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <button class="back-btn" onclick="showScreen('forgot-password-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="create_new_password">Create New Password</h2>
+            </div>
+            
+            <div class="auth-info">
+                <h3 data-translate="almost_done">Almost Done!</h3>
+                <p data-translate="new_password_description">Enter your new password below. Make sure it's secure and easy to remember.</p>
+            </div>
+
+            <form id="reset-password-form" class="auth-form">
+                <div class="form-group">
+                    <label for="new-password" data-translate="new_password">New Password</label>
+                    <input type="password" id="new-password" required>
+                    <div class="password-requirements">
+                        <div class="requirement" id="reset-req-length">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_length">At least 8 characters</span>
+                        </div>
+                        <div class="requirement" id="reset-req-uppercase">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_uppercase">One uppercase letter</span>
+                        </div>
+                        <div class="requirement" id="reset-req-symbol">
+                            <i class="fas fa-circle"></i>
+                            <span data-translate="password_req_symbol">One special character</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password" data-translate="confirm_new_password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                    <span class="error-message" id="confirm-password-error"></span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" data-translate="reset_password">Reset Password</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p data-translate="remember_password">Remember your password? <a href="#" onclick="showScreen('login-screen')" data-translate="login_here">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipes Screen -->
+    <div id="recipes-screen" class="screen">
+        <div class="recipes-container">
+            <div class="recipes-header">
+                <button class="back-btn" onclick="goBackToDetail()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 data-translate="recipes">Recipes</h2>
+            </div>
+            
+            <div class="recipes-content">
+                <div id="recipes-list">
+                    <!-- Recipes will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div id="chatbot" class="chatbot">
+        <!-- Chat Button -->
+        <div id="chat-button" class="chat-button" onclick="toggleChat()">
+            <i class="fas fa-comments"></i>
+            <span class="chat-notification" id="chat-notification" style="display: none;">1</span>
+        </div>
+        
+        <!-- Chat Window -->
+        <div id="chat-window" class="chat-window" style="display: none;">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="fas fa-seedling"></i>
+                    <span data-translate="garden_assistant">Garden Assistant</span>
+                </div>
+                <button class="chat-close" onclick="toggleChat()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <!-- Welcome message -->
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="message-content">
+                        <p data-translate="chat_welcome">Hello! I'm your Garden Assistant. I can help you with:</p>
+                        <ul>
+                            <li data-translate="chat_help_1">Planting advice and tips</li>
+                            <li data-translate="chat_help_2">Soil and watering questions</li>
+                            <li data-translate="chat_help_3">Pest and disease identification</li>
+                            <li data-translate="chat_help_4">Harvesting guidance</li>
+                            <li data-translate="chat_help_5">General gardening support</li>
+                        </ul>
+                        <p data-translate="chat_ask">What would you like to know about?</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Ask me about gardening..." data-translate-placeholder="chat_placeholder">
+                    <button id="chat-send" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="quick-questions">
+                    <button class="quick-question" onclick="askQuickQuestion('How do I start growing tomatoes?')" data-translate="quick_tomatoes">🍅 Tomatoes</button>
+                    <button class="quick-question" onclick="askQuickQuestion('What soil is best for vegetables?')" data-translate="quick_soil">🌱 Soil</button>
+                    <button class="quick-question" onclick="askQuickQuestion('How often should I water my plants?')" data-translate="quick_water">💧 Watering</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
