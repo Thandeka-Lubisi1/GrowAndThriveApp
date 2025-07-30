@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🌱 Grow & Thrive
 
 A responsive web application designed to help unemployed and low-income individuals grow their own food and potentially start small businesses selling or cooking vegetables.
@@ -202,3 +203,7 @@ This project is open source and available under the MIT License.
 ---
 
 **Grow & Thrive** - Empowering communities through sustainable food production 🌱 
+=======
+# GrowAndThriveApp
+Grow &amp; Thrive is a smart gardening app designed to help South Africans fight hunger and unemployment. It provides step‑by‑step guidance, daily task tracking, and an easy way to sell harvests, turning small gardens into sources of food, income, and hope for local communities.
+>>>>>>> 6e854398cd1464c59d821038ec2d91bbe73bbb8c
